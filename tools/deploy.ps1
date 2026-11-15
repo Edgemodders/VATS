@@ -28,5 +28,5 @@ if (Test-Path $spike) {
     Write-Host "Deployed $($_.Name) to $sounds"
   }
 } else {
-  Write-Host "No VATS spike app at $spike: its sounds were not copied"
+  Write-Host "No VATS spike app at ${spike}: its sounds were not copied"
 }
