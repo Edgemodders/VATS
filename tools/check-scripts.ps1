@@ -42,3 +42,31 @@ function Check([string]$what, [string[]]$extra) {
 Check 'Alone' @()
 $codeware = Join-Path $GameDir 'red4ext\plugins\Codeware\Scripts'
 if (Test-Path $codeware) { Check 'Beside Codeware' @($codeware) } else { Write-Host 'Codeware not installed: that check skipped' }
+
+# The game's own compiler (engine\tools\scc.exe, redscript's) on a scratch copy of the game's layout
+# in out\scc, with Codeware's scripts beside VATS's as in the game. It is stricter than this
+# redscript-cli in places: it refused "private let m_partChance: Int32 = -1;" (a negative field
+# default) that the CLI took (2026-11-14). Nothing is written next to the game's own files.
+$scc = Join-Path $GameDir 'engine\tools\scc.exe'
+if (Test-Path $scc) {
+  $box = Join-Path $out 'scc'
+  if (Test-Path $box) { Remove-Item -Recurse -Force $box }
+  foreach ($d in 'engine\tools', 'r6\cache', 'r6\scripts', 'r6\logs') { New-Item -ItemType Directory -Force (Join-Path $box $d) | Out-Null }
+  Copy-Item $scc, (Join-Path $GameDir 'engine\tools\scc_lib.dll') (Join-Path $box 'engine\tools') -Force
+  # The game's own bundle: redscript keeps it as .bk once it has written the cache itself.
+  $bk = Join-Path $GameDir 'r6\cache\final.redscripts.bk'
+  Copy-Item ($(if (Test-Path $bk) { $bk } else { $bundle })) (Join-Path $box 'r6\cache\final.redscripts') -Force
+  Copy-Item (Join-Path $src 'VATS') (Join-Path $box 'r6\scripts\VATS') -Recurse -Force
+  if (Test-Path $codeware) { Copy-Item $codeware (Join-Path $box 'r6\scripts\Codeware') -Recurse -Force }
+  & (Join-Path $box 'engine\tools\scc.exe') -compile (Join-Path $box 'r6\scripts') 2>&1 | Out-Null
+  $log = Get-Content (Join-Path $box 'r6\logs\redscript_rCURRENT.log') -ErrorAction SilentlyContinue
+  $errors = @($log | Select-String -CaseSensitive -Pattern '\[ERROR' -Context 0, 3)
+  if ($errors.Count) {
+    $errors | ForEach-Object { $_.ToString() } | Write-Host
+    throw "The game's compiler: $($errors.Count) error(s)"
+  }
+  if (-not ($log | Select-String 'Compilation complete')) { throw "The game's compiler did not finish: see $box\r6\logs" }
+  Write-Host "The game's compiler (scc.exe): 0 errors, beside Codeware"
+} else {
+  Write-Host "No engine\tools\scc.exe in the game folder: the game's compiler check skipped"
+}

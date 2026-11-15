@@ -96,7 +96,7 @@ public class VATSPanelSystem extends ScriptableSystem {
   // The line under the scanned enemy's name (PartLine.reds): the lit part and its chance.
   private let m_partLineOwner: wref<QuickhacksListGameController>;
   private let m_partName: String;
-  private let m_partChance: Int32 = -1;
+  private let m_partChance: Int32; // set by SetCurrentPart (the game's compiler takes no negative field default)
 
   public func SetPartLineOwner(owner: ref<QuickhacksListGameController>) -> Void {
     this.m_partLineOwner = owner;
