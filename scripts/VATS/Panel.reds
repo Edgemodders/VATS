@@ -93,6 +93,17 @@ public class VATSPanelSystem extends ScriptableSystem {
     this.m_panel = panel;
   }
 
+  // Whether the panel's third tab is VATS's now (an NPC scanned), not the game's TwinTone.
+  private let m_tabIsVats: Bool;
+
+  public func SetTabIsVats(on: Bool) -> Void {
+    this.m_tabIsVats = on;
+  }
+
+  public func TabIsVats() -> Bool {
+    return this.m_tabIsVats;
+  }
+
   private func Redraw() -> Void {
     if IsDefined(this.m_panel) {
       this.m_panel.VATSRedraw();
@@ -198,6 +209,12 @@ public final func VATSEnabledChanged() {
 @addMethod(scannerDetailsGameController)
 public final func VATSRefreshTabs() {
   let active = this.VATSActive();
+  if IsDefined(this.m_player) {
+    let system = VATSPanelSystem.Get(this.m_player.GetGame());
+    if IsDefined(system) {
+      system.SetTabIsVats(active);
+    }
+  }
   this.VATSPutBack();
   this.VATSLabel(active);
   if IsDefined(this.m_vatsBody) {
@@ -351,4 +368,21 @@ public final func VATSRedraw() {
     this.m_vatsValues[i].SetText(chance < 0 ? "--" : IntToString(chance) + "%");
     i += 1;
   }
+}
+
+// ---------- the quickhack list ----------
+
+// The quickhack list (and the cyberdeck's RAM above it) hides itself while the panel's open tab is
+// TwinTone, the car paint tab (IsPanelBlocked). On an NPC that slot is VATS's, where the quickhacks
+// must stay (the owner, 2026-11-14).
+@wrapMethod(QuickhacksListGameController)
+private final func IsPanelBlocked() -> Bool {
+  let player = this.GetPlayerControlledObject();
+  if IsDefined(player) {
+    let system = VATSPanelSystem.Get(player.GetGame());
+    if IsDefined(system) && system.TabIsVats() {
+      return false;
+    }
+  }
+  return wrappedMethod();
 }
