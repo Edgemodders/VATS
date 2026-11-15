@@ -19,7 +19,7 @@ V's own time is never changed: leaving V out of the slow motion would be a free 
 | Piece | Decided |
 |---|---|
 | The part under the crosshair | Outlined by the game itself (the meshes worn on that part, named by their prefix: head `h0_`, `heb_`, `hh_`, `h1_`; torso `t1_`, `t2_`; arms `g1_`, `a0_` by side; legs `l1_`, `s1_`), in a colour that stands out from the scanner's red; green is wanted |
-| Hit chances | In a **VATS tab** in the scanner's panel, after Data: the six parts with their chances. Replaces the earlier idea of callouts beside the body |
+| Hit chances | In a **VATS tab** in the scanner's panel: the six parts with their chances. Replaces the earlier idea of callouts beside the body. It is the third tab (Data, Hacking, VATS): the game's tab animations find the headers by place, so VATS cannot simply move its header after Data (V13's first run) |
 | Sounds | `assets/sounds/vats-zoom.mp3` as the VATS zoom starts, `assets/sounds/vats-select.mp3` each time a body part lights (the owner's, 2026-11-14). REDnode's own audio plays them in real time, in the game's sound effects volume, so the slow motion does not slow them |
 | The upload icon | On the part's slot, not above the head (the game's own bar if it follows the event's `slotName`, else a REDnode pin) |
 
@@ -48,7 +48,7 @@ V's own time is never changed: leaving V out of the slow motion would be a free 
 
 ## Spike V13: the VATS tab
 
-The panel (`scannerDetailsGameController`) shows Data, then either Hacking or TwinTone (the vehicle paint tab, never for an NPC). For an NPC, `scripts/VATS/Panel.reds` takes TwinTone's slot: the header says VATS and moves after Data (Data, VATS, Hacking), and its body lists the parts with their chances from `VATS.VATSPanelSystem`, which VATS's Node mod sets through REDnode's `api`:
+The panel (`scannerDetailsGameController`) shows Data, then either Hacking or TwinTone (the vehicle paint tab, never for an NPC). For an NPC, `scripts/VATS/Panel.reds` takes TwinTone's slot: the third header says VATS (Data, Hacking, VATS), and its body lists the parts with their chances from `VATS.VATSPanelSystem`, which VATS's Node mod sets through REDnode's `api`:
 
 ```js
 const systems = await api.GameInstance.GetScriptableSystemsContainer(game.instance);
@@ -56,4 +56,6 @@ const panel = await systems.Get('VATS.VATSPanelSystem');
 await panel.SetPart('Head', 80); // 0 to 100, or -1 for not known
 ```
 
-Checked with redscript-cli against game 2.5's scripts, alone and beside Codeware (0 errors in VATS's file). Not yet run in the game.
+Checked with redscript-cli against game 2.5's scripts, alone and beside Codeware (0 errors in VATS's file).
+
+First run, 2026-11-14 (the owner's screenshots): the VATS tab showed, with the parts and their chances fed from the spike app. With its header moved after Data, the Hacking body opened under the VATS header and VATS's list under the Hacking header, and the bottom lines were off: the game's tab animations (`tab_hack_open`, `tab_twintone_open`) find the headers by place. The list also touched the panel's edges. Fixed the same day: the headers stay in the game's order, VATS last; the list has a margin and the chances in their own column. To put VATS second after all, the bodies would have to swap instead (VATS's list in the Hacking slot, the quickhack description moved into the third), which touches the game's quickhack panel (not tried).

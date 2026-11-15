@@ -2,9 +2,12 @@
 //
 // The panel (scannerDetailsGameController) shows Data and then either Hacking or TwinTone, the
 // vehicle paint tab, which an NPC never has. While scanning an NPC, VATS takes TwinTone's slot:
-// its header says VATS and moves after Data (Data, VATS, Hacking; Switch Tab cycles in that
-// order), and its body shows the scanned enemy's body parts with their hit chances. A car keeps
-// TwinTone as the game made it.
+// its header says VATS (Data, Hacking, VATS; Switch Tab cycles in that order), and its body shows
+// the scanned enemy's body parts with their hit chances. A car keeps TwinTone as the game made it.
+//
+// The headers stay where the game put them: its tab animations find their widgets by place, so
+// moving TwinTone's header after Data (V13's first run, 2026-11-14) lit the wrong header over the
+// wrong body and broke the bottom lines.
 //
 // The numbers come from VATS's Node mod, through REDnode's api:
 //   const panel = await (await api.GameInstance.GetScriptableSystemsContainer(game.instance)).Get('VATS.VATSPanelSystem');
@@ -103,13 +106,13 @@ public class VATSPanelSystem extends ScriptableSystem {
 private let m_vatsBody: wref<inkVerticalPanel>;
 
 @addField(scannerDetailsGameController)
-private let m_vatsRows: array<wref<inkText>>;
+private let m_vatsNames: array<wref<inkText>>;
+
+@addField(scannerDetailsGameController)
+private let m_vatsValues: array<wref<inkText>>;
 
 @addField(scannerDetailsGameController)
 private let m_vatsTwinToneLabel: String;
-
-@addField(scannerDetailsGameController)
-private let m_vatsOrdered: Bool;
 
 // Whether the tab in TwinTone's slot is VATS's now: an NPC scanned, VATS on.
 @addMethod(scannerDetailsGameController)
@@ -147,17 +150,19 @@ private const final func ShouldDisplayTwintoneTab() -> Bool {
   return wrappedMethod();
 }
 
-// Data, VATS, Hacking: the game lists Data, then Hacking or TwinTone, never both.
+// Data, Hacking, VATS: the game lists Data, then Hacking or TwinTone, never both. VATS comes last,
+// as its header is the last.
 @wrapMethod(scannerDetailsGameController)
 private const final func GetAvailablesTabs() -> array<ScannerDetailTab> {
   let tabs = wrappedMethod();
   if this.VATSActive() && !ArrayContains(tabs, ScannerDetailTab.TwinTone) {
-    ArrayInsert(tabs, 1, ScannerDetailTab.TwinTone);
+    ArrayPush(tabs, ScannerDetailTab.TwinTone);
   }
   return tabs;
 }
 
-// The game counts Hacking or TwinTone, not both.
+// The game counts Hacking or TwinTone, not both. With both counted, its own UpdateTabBottomLine
+// draws the three-tab line under Data, Hacking or the third tab, which is VATS's order.
 @wrapMethod(scannerDetailsGameController)
 private final func GetNumberOfTabsDiplayed() -> Int32 {
   let n = 1;
@@ -170,19 +175,7 @@ private final func GetNumberOfTabsDiplayed() -> Int32 {
   return n;
 }
 
-// With three tabs in VATS's order the bottom line under each is: Data 01, VATS 02, Hacking 03.
-@wrapMethod(scannerDetailsGameController)
-private final func UpdateTabBottomLine() {
-  wrappedMethod();
-  if !this.VATSActive() || this.GetNumberOfTabsDiplayed() != 3 {
-    return;
-  }
-  inkWidgetRef.SetVisible(this.m_threetabs01BottomLine, Equals(this.m_currentTab, ScannerDetailTab.Data));
-  inkWidgetRef.SetVisible(this.m_threetabs02BottomLine, Equals(this.m_currentTab, ScannerDetailTab.TwinTone));
-  inkWidgetRef.SetVisible(this.m_threetabs03BottomLine, Equals(this.m_currentTab, ScannerDetailTab.Hacking));
-}
-
-// Each time the header changes: the third tab's name, its place, and its body.
+// Each time the header changes: the third tab's name and its body.
 @wrapMethod(scannerDetailsGameController)
 private final func ToggleTwintoneVisibility() {
   wrappedMethod();
@@ -205,7 +198,7 @@ public final func VATSEnabledChanged() {
 @addMethod(scannerDetailsGameController)
 public final func VATSRefreshTabs() {
   let active = this.VATSActive();
-  this.VATSOrder(active);
+  this.VATSPutBack();
   this.VATSLabel(active);
   if IsDefined(this.m_vatsBody) {
     this.m_vatsBody.SetVisible(active);
@@ -216,32 +209,25 @@ public final func VATSRefreshTabs() {
   }
 }
 
-// Data, space, VATS, space, Hacking when on; the game's own order when off.
+// The headers in the game's own order (tab01, space01, tab02, space02, tab03), in case an earlier
+// VATS (V13's first run) moved them; the panel's widgets live on through save loads.
 @addMethod(scannerDetailsGameController)
-private final func VATSOrder(on: Bool) {
-  let vats = inkWidgetRef.Get(this.m_toggleDescriptionTwintonePart);
+private final func VATSPutBack() {
+  let third = inkWidgetRef.Get(this.m_toggleDescriptionTwintonePart);
   let hack = inkWidgetRef.Get(this.m_toggleDescirptionHackPart);
   let space1 = inkWidgetRef.Get(this.m_spaceTab01);
   let space2 = inkWidgetRef.Get(this.m_spaceTab02);
-  if !IsDefined(vats) || !IsDefined(hack) {
+  if !IsDefined(third) || !IsDefined(hack) || !IsDefined(space1) || !IsDefined(space2) {
     return;
   }
-  let tabs = vats.GetParentWidget() as inkCompoundWidget;
-  if !IsDefined(tabs) || Equals(this.m_vatsOrdered, on) {
+  let tabs = third.GetParentWidget() as inkCompoundWidget;
+  if !IsDefined(tabs) || tabs.GetWidgetByIndex(4) == third {
     return;
   }
-  if on {
-    tabs.ReorderChild(space2, 1);
-    tabs.ReorderChild(vats, 2);
-    tabs.ReorderChild(space1, 3);
-    tabs.ReorderChild(hack, 4);
-  } else {
-    tabs.ReorderChild(space1, 1);
-    tabs.ReorderChild(hack, 2);
-    tabs.ReorderChild(space2, 3);
-    tabs.ReorderChild(vats, 4);
-  }
-  this.m_vatsOrdered = on;
+  tabs.ReorderChild(space1, 1);
+  tabs.ReorderChild(hack, 2);
+  tabs.ReorderChild(space2, 3);
+  tabs.ReorderChild(third, 4);
 }
 
 // The third tab's text says VATS for an NPC and the game's own word otherwise.
@@ -304,7 +290,20 @@ private final func VATSShowTwinToneBody(show: Bool) {
   }
 }
 
-// VATS's body: a heading and a row per part, in twintoneContainer.
+// One line of text in the panel's look.
+public func VATSText(size: Int32) -> ref<inkText> {
+  let t = new inkText();
+  t.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
+  t.SetFontStyle(n"Medium");
+  t.SetFontSize(size);
+  t.SetTintColor(HDRColor(1.1761, 0.3809, 0.3476, 1.0));
+  t.SetLetterCase(textLetterCase.UpperCase);
+  t.SetText("");
+  return t;
+}
+
+// VATS's body in twintoneContainer: a row per part, the part's name in a column of its own and
+// its chance beside it, kept clear of the panel's edges.
 @addMethod(scannerDetailsGameController)
 private final func VATSBuildBody() {
   let container = inkWidgetRef.Get(this.m_twintoneContainer) as inkCompoundWidget;
@@ -314,21 +313,24 @@ private final func VATSBuildBody() {
   let body = new inkVerticalPanel();
   body.SetName(n"vatsBody");
   body.SetVisible(false);
-  body.SetChildMargin(inkMargin(0.0, 6.0, 0.0, 6.0));
+  body.SetMargin(36.0, 24.0, 36.0, 24.0);
+  body.SetChildMargin(inkMargin(0.0, 4.0, 0.0, 4.0));
   container.AddChildWidget(body);
   this.m_vatsBody = body;
-  ArrayClear(this.m_vatsRows);
+  ArrayClear(this.m_vatsNames);
+  ArrayClear(this.m_vatsValues);
   let i = 0;
   while i < 6 {
-    let row = new inkText();
-    row.SetFontFamily("base\\gameplay\\gui\\fonts\\raj\\raj.inkfontfamily");
-    row.SetFontStyle(n"Medium");
-    row.SetFontSize(38);
-    row.SetTintColor(HDRColor(1.1761, 0.3809, 0.3476, 1.0));
-    row.SetLetterCase(textLetterCase.UpperCase);
-    row.SetText("");
+    let row = new inkHorizontalPanel();
     body.AddChildWidget(row);
-    ArrayPush(this.m_vatsRows, row);
+    let name = VATSText(38);
+    name.SetFitToContent(false);
+    name.SetSize(260.0, 48.0);
+    row.AddChildWidget(name);
+    let value = VATSText(38);
+    row.AddChildWidget(value);
+    ArrayPush(this.m_vatsNames, name);
+    ArrayPush(this.m_vatsValues, value);
     i += 1;
   }
 }
@@ -343,10 +345,10 @@ public final func VATSRedraw() {
     return;
   }
   let i = 0;
-  while i < ArraySize(this.m_vatsRows) && i < system.PartCount() {
+  while i < ArraySize(this.m_vatsNames) && i < system.PartCount() {
     let chance = system.PartChance(i);
-    let value = chance < 0 ? "--" : IntToString(chance) + "%";
-    this.m_vatsRows[i].SetText(system.PartName(i) + "   " + value);
+    this.m_vatsNames[i].SetText(system.PartName(i));
+    this.m_vatsValues[i].SetText(chance < 0 ? "--" : IntToString(chance) + "%");
     i += 1;
   }
 }
