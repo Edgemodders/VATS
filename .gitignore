@@ -1,0 +1,15 @@
+# Build and check output
+out/
+*.redscripts
+*.redscripts.*
+
+# Game files and anything taken from them (decompiled scripts included) never go in the repo
+decompiled*.reds
+*.archive
+
+# Editors and OS
+.vscode/
+.claude/settings.local.json
+Thumbs.db
+.DS_Store
+node_modules/
