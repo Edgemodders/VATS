@@ -17,7 +17,7 @@ VATS (Visual Assisted Targeting System) is a drop-in REDnode mod for Cyberpunk 2
 ## Working rules (as in every Edgemodders repo)
 
 - Commit straight to `main` and push, in small logical commits; agree the plan in chat first.
-- Git identity per repo: `CyberbuildsAI` with the GitHub no-reply email. Never change the global identity.
+- Git identity per repo: `CyberbuildsAI` with the GitHub no-reply email, and `credential.https://github.com.username=CyberbuildsAI` so Git Credential Manager pushes as that account without asking (set on 2026-11-14). Never change the global identity.
 - Never commit game files or anything extracted from them, game scripts included: the decompiled game scripts used to write the wraps stay in a scratchpad.
 - **redscript:** check every change with redscript-cli before it reaches the game, since one compile error stops every script in the game: `.\tools\check-scripts.ps1` (alone, and beside Codeware's scripts, counting errors in VATS's files only; this CLI version reports 24 errors in Codeware 1.21's own files, which the game's compiler accepts). redscript-cli is at `E:\Modding\Tools\redscript-cli` on the dev PC (REDnode's docs/dev-setup.md).
 - Deploying writes into the game folder: ask the owner first, with the game closed (`.\tools\deploy.ps1`).
