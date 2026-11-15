@@ -13,6 +13,7 @@ A drop-in [REDnode](https://github.com/Edgemodders/REDnode) mod. It needs REDnod
 | The design | [docs/design.md](docs/design.md) |
 | The research (spikes, test results) | REDnode's [VATS page](https://edgemodders.github.io/REDnode/vats.html) |
 | Scripts (redscript) | [scripts/VATS](scripts/VATS): the VATS tab in the scanner's panel (spike V13) |
+| Sounds | [assets/sounds](assets/sounds): the zoom and the part select |
 
 ## Licence
 

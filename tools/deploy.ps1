@@ -16,3 +16,17 @@ Get-ChildItem (Join-Path $repo 'scripts\VATS') -Filter *.reds | ForEach-Object {
   Copy-Item $_.FullName (Join-Path $to $_.Name) -Force
   Write-Host "Deployed $($_.Name) to $to"
 }
+
+# VATS's sounds. While VATS is in research they play from REDnode's VATS spike app, so they go into
+# its sounds folder; VATS's own package will carry them itself.
+$spike = Join-Path $GameDir 'red4ext\plugins\REDnode\apps\vats-spike'
+if (Test-Path $spike) {
+  $sounds = Join-Path $spike 'sounds'
+  New-Item -ItemType Directory -Force $sounds | Out-Null
+  Get-ChildItem (Join-Path $repo 'assets\sounds') -File | ForEach-Object {
+    Copy-Item $_.FullName (Join-Path $sounds $_.Name) -Force
+    Write-Host "Deployed $($_.Name) to $sounds"
+  }
+} else {
+  Write-Host "No VATS spike app at $spike: its sounds were not copied"
+}

@@ -11,7 +11,8 @@ VATS (Visual Assisted Targeting System) is a drop-in REDnode mod for Cyberpunk 2
 
 ## Current status
 
-- Spike V13 (the VATS tab): `scripts/VATS/Panel.reds` written and compile-checked; not yet run in the game.
+- Spike V13 (the VATS tab): `scripts/VATS/Panel.reds` written, compile-checked and deployed on 2026-11-14; awaiting its in-game test (REDnode's docs/vats.md, "V13 test").
+- Sounds (the owner's, 2026-11-14): `assets/sounds/vats-zoom.mp3` (the zoom starts) and `vats-select.mp3` (a part lights). While VATS is in research they play from REDnode's VATS spike app (0.5.2), and `tools/deploy.ps1` copies them into its `sounds` folder in the game.
 
 ## Working rules (as in every Edgemodders repo)
 

@@ -20,6 +20,7 @@ V's own time is never changed: leaving V out of the slow motion would be a free 
 |---|---|
 | The part under the crosshair | Outlined by the game itself (the meshes worn on that part, named by their prefix: head `h0_`, `heb_`, `hh_`, `h1_`; torso `t1_`, `t2_`; arms `g1_`, `a0_` by side; legs `l1_`, `s1_`), in a colour that stands out from the scanner's red; green is wanted |
 | Hit chances | In a **VATS tab** in the scanner's panel, after Data: the six parts with their chances. Replaces the earlier idea of callouts beside the body |
+| Sounds | `assets/sounds/vats-zoom.mp3` as the VATS zoom starts, `assets/sounds/vats-select.mp3` each time a body part lights (the owner's, 2026-11-14). REDnode's own audio plays them in real time, in the game's sound effects volume, so the slow motion does not slow them |
 | The upload icon | On the part's slot, not above the head (the game's own bar if it follows the event's `slotName`, else a REDnode pin) |
 
 ## The parts
