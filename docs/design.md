@@ -21,6 +21,7 @@ V's own time is never changed: leaving V out of the slow motion would be a free 
 | Piece | Decided |
 |---|---|
 | The part under the crosshair | Outlined by the game itself (the meshes worn on that part, named by their prefix: head `h0_`, `heb_`, `hh_`, `h1_`; torso `t1_`, `t2_`; arms `g1_`, `a0_` by side; legs `l1_`, `s1_`), in a colour that stands out from the scanner's red; green is wanted |
+| The lit part | Its name and hit chance as a line of the game's own UI under the scanned enemy's name above the crosshair (the quickhack list's `scanner_target_name`), in VATS's green (`scripts/VATS/PartLine.reds`, fed by `VATSPanelSystem.SetCurrentPart`). It replaces the floating overlay label, which the owner could not see in game; it shows while the quickhack list does |
 | Hit chances | In a **VATS tab** in the scanner's panel: the six parts with their chances. Replaces the earlier idea of callouts beside the body. It is the third tab (Data, Hacking, VATS): the game's tab animations find the headers by place, so VATS cannot simply move its header after Data (V13's first run) |
 | Sounds | `assets/sounds/vats-zoom.mp3` as the VATS zoom starts, `assets/sounds/vats-select.mp3` each time a body part lights (the owner's, 2026-11-14). REDnode's own audio plays them in real time, in the game's sound effects volume, so the slow motion does not slow them |
 | The upload icon | On the part's slot, not above the head (the game's own bar if it follows the event's `slotName`, else a REDnode pin) |

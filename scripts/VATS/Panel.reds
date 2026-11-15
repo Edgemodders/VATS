@@ -93,6 +93,30 @@ public class VATSPanelSystem extends ScriptableSystem {
     this.m_panel = panel;
   }
 
+  // The line under the scanned enemy's name (PartLine.reds): the lit part and its chance.
+  private let m_partLineOwner: wref<QuickhacksListGameController>;
+  private let m_partName: String;
+  private let m_partChance: Int32 = -1;
+
+  public func SetPartLineOwner(owner: ref<QuickhacksListGameController>) -> Void {
+    this.m_partLineOwner = owner;
+  }
+
+  // The lit part (a name from the six, or "" for none) and its chance (0 to 100, or -1 for not known).
+  public func SetCurrentPart(name: String, chance: Int32) -> Bool {
+    this.m_partName = name;
+    this.m_partChance = chance;
+    if !IsDefined(this.m_partLineOwner) {
+      return false;
+    }
+    if StrLen(name) == 0 {
+      this.m_partLineOwner.VATSShowPart("");
+    } else {
+      this.m_partLineOwner.VATSShowPart(name + "   " + (chance < 0 ? "--" : IntToString(chance) + "%"));
+    }
+    return true;
+  }
+
   // Whether the panel's third tab is VATS's now (an NPC scanned), not the game's TwinTone.
   private let m_tabIsVats: Bool;
 
