@@ -10,6 +10,7 @@ The Visual Assisted Targeting System: body part targeting during combat. The res
 | Enter VATS | While scanning, the right trigger (or the VATS key): the view frames the enemy so their whole body is large and centred, from V's own line of sight. Time slows far more than the scanner's own slow motion |
 | In VATS | The player picks a body part with the crosshair; the part is outlined. Any enemy looked at during the same scan can be picked. The game's own quickhack wheel shows only VATS quickhacks, and the smart gun works too |
 | Body part quickhacks | A VATS quickhack goes to one of six parts; each part can take one separately. They start only in VATS; an upload goes on after VATS ends and lands on its part |
+| Cuts | For VATS quickhacks and VATS perks the cut comes **before** any damage: VATS decides it, not the game's damage-based dismember chance (the owner, 2026-11-14). VATS then sets off the game's own reactions: the `Dismembered<zone>` status effect, the crippled bark, hostility and V as the threat (spike V16); the pain hit reaction is still to find. Bullets can also cut through the game's own hit with V's `CanForceDismbember` stat (V14b) |
 | Leave VATS | Let go of the trigger, or of the scanner. VATS also has a timed duration |
 
 V's own time is never changed: leaving V out of the slow motion would be a free Sandevistan.
